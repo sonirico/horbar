@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <link href="horbar.css" rel="stylesheet" />
+        <title>Horbar</title>
+    </head>
+    <body>
+        <div id="my-chart">
+        </div>
+
+        <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+        <script type="text/javascript" src="horbar.js"></script>
+
+        <script>
+            $(function () {
+
+              setTimeout(function() {
+                  $('#my-chart').horbar();
+              }, 0);
+
+            });
+        </script>
+    </body>
+
+</html>
