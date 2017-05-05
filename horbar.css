@@ -55,6 +55,7 @@
 }
 
 .horbar .content .bar-row {
+    position: relative;
     width: 100%;
     clear: both;
     height: 2em;
@@ -179,7 +180,7 @@
 
 /* Popover */
 
-.horbar .popover {
+#horbar-popover {
     display: none;
     position: absolute;
     min-width: 50px;
@@ -189,6 +190,7 @@
     border-radius: 5px;
     padding: 5px;
     color: white;
+    z-index: 100;
 }
 
 
@@ -200,7 +202,7 @@
     height: 100%;
     margin: 0 auto;
     float: left;
-    font-size: calc(6px + 0.2vw);    
+    font-size: calc(6px + 0.2vw);
     text-align: center;
     color: black;
     font-weight: bold;

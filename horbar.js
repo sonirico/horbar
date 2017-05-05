@@ -45,23 +45,38 @@
             self.processContent();
             self.processXLabels();
 
-            self.adjustLabels();
-            self.buildLegends();
 
-            // callBacks
-            self.callBacks();
+
+            // TODO: Promises!
+            setTimeout(function () {
+              // Segment callbacks
+              self.callBacks();
+
+
+            }, 0);
+
+            setTimeout(function() {
+                self.adjustLabels();
+                self.buildLegends();
+
+
+            }, 0);
+
         };
 
-        self.callBacks = function () {
+        self.callBacks = function() {
             // X labels
-            self.target.find('.x-label-content').each(function () {
+            self.target.find('.x-label-content').each(function() {
                 $(this).append(
                     config.options.xLabels.drawCallBack(
                         $(this).data().value
                     )
                 );
             });
-
+            // segments
+            self.target.find('.bar-segment').each(function (){
+                config.options.segments.drawCallBack($(this))
+            });
         };
 
         self.adjustLabels = function() {
@@ -81,6 +96,7 @@
 
             self.target.find('.x-label-content').each(function() {
                 var $label = $(this);
+
                 $label.css({
                     'margin-left': '-' + ($label.width() / 2) + 'px'
                 });
@@ -101,7 +117,7 @@
 
             // TODO: Encapsulate this logic
             var res = [];
-            var delta = Math.round(self.threshold / self.tickLength);
+            var delta = self.resolveDelta();
             var nTicks = self.threshold / delta;
             var widthPerLabel = 100 / nTicks;
             var remainingWidthPercent = 100;
@@ -112,7 +128,7 @@
                 if (remainingWidthPercent >= widthPerLabel) {
                     realWidth = widthPerLabel;
                 } else {
-                    realWidth = remainingWidthPercent;
+                    break;
                 }
 
                 if (realWidth < 1) {
@@ -151,15 +167,32 @@
             }
         };
 
+        self.resolveDelta = function() {
+            var delta = -1;
+
+            if (self.threshold < 10) {
+                delta = 1;
+            } else {
+                var limitLength = self.threshold.toString().length - 1;
+                var magnitude = Math.pow(10, limitLength);
+                var threshold = Math.ceil(self.threshold / magnitude) * magnitude;
+
+                delta = Math.max(threshold / self.tickLength, self.tickLength);
+            }
+
+            return delta;
+        };
+
         self.processXLabels = function() {
 
             var res = [];
-            var delta = Math.round(self.threshold / self.tickLength);
-            var nTicks = self.threshold / delta;
+
+            var delta = self.resolveDelta();
+            var nTicks = (self.threshold / delta);
             var widthPerLabel = 100 / nTicks;
             var remainingWidthPercent = 100;
 
-            for (var i = 0; i < nTicks; i++) {
+            for (var i = 0; i < (nTicks); i++) {
                 var realWidth = 0;
 
                 if (remainingWidthPercent >= widthPerLabel) {
@@ -172,7 +205,7 @@
                     break;
                 }
 
-                realWidth += '%'
+                realWidth += '%';
 
                 res.push(
                     $('<div>').addClass('x-label').css({
@@ -231,13 +264,10 @@
                 });
             });
 
-            // Segment callbacks
-            config.options.segments.drawCallBack($segment);
-
             return $segment;
         }
 
-        self.processContent = function () {
+        self.processContent = function() {
             var data = config.data;
             var labels = config.labels;
             var res = [];
@@ -288,7 +318,7 @@
 
             // HACK .ne .se ... harcoded
             self.target.find('.content').append(
-                $('<div>').addClass('legends ne').append(
+                $('<div>').addClass('legends se').append(
                     legends
                 )
             );
@@ -329,9 +359,18 @@
                 }
             ],
             'dataSets': [
-                [1, 5, 11],
-                [2, 2, 0],
-                [3, 1, 2],
+                // [1, 5, 11],
+                // [2, 2, 0],
+                // [3, 1, 2],
+                [r(), r(), r()],
+                [r(), r(), r()],
+                [r(), r(), r()],
+                [r(), r(), r()],
+                [r(), r(), r()],
+                [r(), r(), r()],
+                [r(), r(), r()],
+                [r(), r(), r()],
+                [r(), r(), r()],
                 [r(), r(), r()],
                 [r(), r(), r()],
                 [r(), r(), r()],
@@ -349,7 +388,7 @@
                 position: "ne"*/
             },
             segments: {
-                drawCallBack: function (segment) {
+                drawCallBack: function(segment) {
                     defaultSegmentCallBack(segment);
                 },
                 events: {
@@ -390,26 +429,24 @@
     };
 
     function r() {
-        return parseInt(Math.random() * 1000);
+        return parseInt(Math.random() * (Math.random() * 1000));
     }
 
     // Default built-in events and callbacks
-    function defaultSegmentCallBack ($segment) {
+    function defaultSegmentCallBack($segment) {
 
-      console.log($segment.width());
-      var $span = $('<span/>').addClass('segment-value').html(
-          $segment.data().value
-      );
+        // console.log($segment.width());
+        var $span = $('<span/>').addClass('segment-value').html(
+            $segment.data().value
+        ).appendTo($segment);
 
-      console.log($span.width());
+        var segment = $segment[0];
+        var offsetWidth = segment.offsetWidth;
+        var scrollWidth = segment.scrollWidth;
 
-        $segment.append(
-            $span
-        );
-        console.log($span.width());
-setTimeout(function () {
-        console.log($span.width());
-      },0);
+        if (offsetWidth < scrollWidth) {
+            $segment.children().hide();
+        }
     }
 
     function showPopover(segment) {
@@ -420,10 +457,10 @@ setTimeout(function () {
 
         // console.log(segment.data());
 
-        var $popover = $('<div>').addClass('popover').append(
+        var $popover = $('<div>').attr('id', 'horbar-popover').append(
             $('<span>').text(segment.data().name),
             $('<span>').text(segment.data().value)
-        ).appendTo('.horbar .content');
+        ).appendTo('body');
 
         var barTop = segment.offset().top;
         var barLeft = segment.offset().left;
@@ -447,7 +484,7 @@ setTimeout(function () {
         // TODO: Watch out namespacing, harcoded ".horbar"
         segment.data('haspopover', false);
 
-        $('.horbar .popover').remove();
+        $('#horbar-popover').remove();
     }
 
     function hexToRgb(hex) {
