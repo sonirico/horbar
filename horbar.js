@@ -45,51 +45,44 @@
             self.processContent();
             self.processXLabels();
 
-            var runCallbacks = function () {
-                var promise = new Promise(function (resolve, reject) {
-                    setTimeout(function() {
-                        // Segment callbacks
 
-                        self.callBacks();
+            var promiseAdjustLabels = function () {
+                return new Promise(function (resolve, rejeect) {
+                    adjustLabels();
+                    resolve();
+                });
+            };
+
+            var promiseLegends = function() {
+                return new Promise(function(resolve, reject) {
+                    setTimeout(function() {
+
+                        self.buildLegends();
                         resolve();
 
                     }, 0);
-                });
-
-                return promise;
-            };
-
-            var runAdjustments = function () {
-                var promise = new Promise(function (resolve, reject) {
-                  setTimeout(function() {
-
-                      self.adjustLabels();
-                      self.buildLegends();
-                      resolve();
-
-                  }, 0);
 
                 });
-
-                return promise;
             };
 
-            var animateChart = function () {
-                return new Promise(function (resolve, reject) {
+            var promiseAnimation = function() {
+                return new Promise(function(resolve, reject) {
                     var animationEnabled = config.options.bars.animate;
 
                     if (animationEnabled) {
                         var speed = config.options.bars.animationSpeed;
 
-                        self.target.find('.bar').each(function () {
-                            $(this).animate({'width': $(this).data('width') + '%'},
-                              speed
-                            ).promise().done(function () {
-                                resolve();
+                        self.target.find('.bar').each(function() {
+                            $(this).animate({
+                                    'width': $(this).data('width') + '%'
+                                },
+                                speed
+                            ).promise().done(function() {
+                                resolve(); // This will work as long as the speed is the same for all bars
                             });
                         });
                     } else {
-                        self.target.find('.bar').each(function () {
+                        self.target.find('.bar').each(function() {
                             $(this).css('width', $(this).data('width') + '%');
                         });
 
@@ -100,28 +93,44 @@
                 });
             };
 
-            //runCallbacks()
-            runAdjustments()
-            .then(animateChart)
-            .then(runCallbacks)
+            var promiseSegmentDrawCallbacks = function () {
+                return new Promise(function (resolve, reject) {
+
+                    setTimeout(function () {
+                        self.target.find('.bar-segment').each(function() {
+                            config.options.segments.drawCallBack($(this))
+                        });
+
+                        resolve();
+                    }, 0);
+
+                });
+            };
+
+            var promiseXLabelsDrawCallbacks = function () {
+                return new Promise(function (resolve, reject) {
+                    setTimeout(function () {
+                        self.target.find('.x-label-content').each(function() {
+                            $(this).append(
+                                config.options.xLabels.drawCallBack(
+                                    $(this).data().value
+                                )
+                            );
+                        });
+
+                        resolve();
+                    }, 0);
+                });
+            };
+
+            promiseLegends()
+            .then(promiseXLabelsDrawCallbacks)
+            .then(promiseAdjustLabels)
+            .then(promiseAnimation)
+            .then(promiseSegmentDrawCallbacks)
         };
 
-        self.callBacks = function() {
-            // X labels
-            self.target.find('.x-label-content').each(function() {
-                $(this).append(
-                    config.options.xLabels.drawCallBack(
-                        $(this).data().value
-                    )
-                );
-            });
-            // segments
-            self.target.find('.bar-segment').each(function() {
-                config.options.segments.drawCallBack($(this))
-            });
-        };
-
-        self.adjustLabels = function() {
+        function adjustLabels() {
 
             // Y labels
             var $sampleBar = self.target.find('.bar-row').first();
@@ -321,12 +330,12 @@
 
                 var $barContainer = $('<div/>').addClass('bar-container');
                 var $bar = $('<div/>')
-                  .addClass('bar')
-                  .css('width', 0)
-                  .data({
-                    'value': sum,
-                    'width': width
-                  });
+                    .addClass('bar')
+                    .css('width', 0)
+                    .data({
+                        'value': sum,
+                        'width': width
+                    });
 
                 for (var j = 0, lenj = data.dataSets[i].length; j < lenj; j++) {
                     if (data.dataSets[i][j] < 1) {
@@ -363,8 +372,8 @@
 
             self.target.find('.content').append(
                 $('<div>')
-                    .addClass('legends ' + legendPositionClass)
-                    .append(legends)
+                .addClass('legends ' + legendPositionClass)
+                .append(legends)
             );
         };
 
