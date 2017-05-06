@@ -3,7 +3,7 @@
     function Chart(target, config) {
         var self = this;
 
-        self.init = function() {
+        function init() {
             self.target = target;
             self.dataSets = config.dataSets;
             self.segments = config.segments;
@@ -45,22 +45,36 @@
             self.processContent();
             self.processXLabels();
 
+            var runCallbacks = function () {
+                var promise = new Promise(function (resolve, reject) {
+                    setTimeout(function() {
+                        // Segment callbacks
 
+                        self.callBacks();
+                        resolve();
 
-            // TODO: Promises!
-            setTimeout(function () {
-              // Segment callbacks
-              self.callBacks();
+                    }, 0);
+                });
 
+                return promise;
+            };
 
-            }, 0);
+            var runAdjustments = function () {
+                var promise = new Promise(function (resolve, reject) {
+                  setTimeout(function() {
 
-            setTimeout(function() {
-                self.adjustLabels();
-                self.buildLegends();
+                      self.adjustLabels();
+                      self.buildLegends();
+                      resolve();
 
+                  }, 0);
 
-            }, 0);
+                });
+
+                return promise;
+            };
+
+            runCallbacks().then(runAdjustments());
 
         };
 
@@ -74,7 +88,7 @@
                 );
             });
             // segments
-            self.target.find('.bar-segment').each(function (){
+            self.target.find('.bar-segment').each(function() {
                 config.options.segments.drawCallBack($(this))
             });
         };
@@ -103,21 +117,10 @@
             });
         };
 
-        self.buildGrid = function() {
+        function buildLabelSchema() {
+            var widths = [];
 
-            var $content = self.target.find('.content');
-            var $subContent = $('<div>').css({
-                'position': 'absolute',
-                'top': '0%',
-                'bottom': '0%',
-                'left': '0%',
-                'right': '0%',
-                'opacity': '0.5'
-            });
-
-            // TODO: Encapsulate this logic
-            var res = [];
-            var delta = self.resolveDelta();
+            var delta = resolveDelta();
             var nTicks = self.threshold / delta;
             var widthPerLabel = 100 / nTicks;
             var remainingWidthPercent = 100;
@@ -135,19 +138,40 @@
                     break;
                 }
 
-                realWidth += '%'
-
-                res.push(
-                    $('<div>').addClass('vertical-grid').css({
-                        'width': realWidth,
-                        'max-width': realWidth,
-                    })
-                );
+                widths.push(realWidth);
 
                 remainingWidthPercent -= widthPerLabel;
             }
 
-            $subContent.append(res);
+            return {
+                'delta': delta,
+                'widths': widths
+            }
+        }
+
+        self.buildGrid = function() {
+
+            var $content = self.target.find('.content');
+            var $subContent = $('<div>').css({
+                'position': 'absolute',
+                'top': '0%',
+                'bottom': '0%',
+                'left': '0%',
+                'right': '0%',
+                'opacity': '0.5'
+            });
+
+            var labelSchema = buildLabelSchema();
+
+            labelSchema.widths.forEach(function(width) {
+                $subContent.append(
+                    $('<div>').addClass('vertical-grid').css({
+                        'width': width + '%',
+                        'max-width': width + '%',
+                    })
+                );
+            });
+
             $content.append($subContent);
         };
 
@@ -167,7 +191,7 @@
             }
         };
 
-        self.resolveDelta = function() {
+        function resolveDelta() {
             var delta = -1;
 
             if (self.threshold < 10) {
@@ -184,46 +208,25 @@
         };
 
         self.processXLabels = function() {
+            var $labelContainer = self.target.find('.x-label-container');
+            var labelSchema = buildLabelSchema();
 
-            var res = [];
-
-            console.log(self.threshold);
-
-            var delta = self.resolveDelta();
-            var nTicks = (self.threshold / delta);
-            var widthPerLabel = 100 / nTicks;
-            var remainingWidthPercent = 100;
-
-            for (var i = 1; i < (nTicks) + 1; i++) {
-                var realWidth = 0;
-
-                if (remainingWidthPercent >= widthPerLabel) {
-                    realWidth = widthPerLabel;
-                } else {
-                    realWidth = remainingWidthPercent;
-                    break;
-                }
-
-                if (realWidth < 1) {
-                    break;
-                }
-
-                realWidth += '%';
-
-                res.push(
+            // Add x-axis labels to chart
+            labelSchema.widths.forEach(function(width, index) {
+                $labelContainer.append(
                     $('<div>').addClass('x-label').css({
-                        'width': realWidth,
-                        'max-width': realWidth
+                        'width': width + '%',
+                        'max-width': width + '%'
                     }).append(
-                        $('<span>').addClass('x-label-content').data('value', delta * i)
+                        $('<span>')
+                        .addClass('x-label-content')
+                        .data('value', labelSchema.delta * (index + 1))
                     )
                 );
+            });
 
-                remainingWidthPercent -= widthPerLabel;
-            }
-
+            // Use the refill as the zero container
             self.target.find('.x-label-refill').html(0);
-            self.target.find('.x-label-container').append(res);
         };
 
         self.processYLabels = function() {
@@ -246,9 +249,11 @@
 
         self.buildSegment = function(width, hexColor, data) {
             var rgb = hexToRgb(hexColor);
-            // HACK: Harcoded alpha. Parametrize
-            var backgroundColor = 'rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', 0.6)';
-            var borderColor = 'rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', 0.9)';
+            var borderAlpha = config.options.segments.style.borderAlpha;
+            var backgroundAlpha = config.options.segments.style.backgroundAlpha;
+
+            var backgroundColor = 'rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', ' + backgroundAlpha + ')';
+            var borderColor = 'rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', ' + borderAlpha + ')';
 
             var $segment = $('<div>').addClass('bar-segment').css({
                 'color': borderColor,
@@ -278,7 +283,7 @@
 
             for (var i = 0, leni = data.dataSets.length; i < leni; i++) {
 
-                var $row = $('<div>').addClass('bar-row');
+                var $row = $('<div/>').addClass('bar-row');
 
                 var sum = data.dataSets[i].reduce(function(a, b) {
                     return a + b;
@@ -286,8 +291,11 @@
 
                 var width = ((sum / self.threshold) * 100);
 
-                var $barContainer = $('<div>').addClass('bar-container');
-                var $bar = $('<div>').addClass('bar').css('width', width + '%').data('value', sum);
+                var $barContainer = $('<div/>').addClass('bar-container');
+                var $bar = $('<div/>')
+                  .addClass('bar')
+                  .css('width', width + '%')
+                  .data('value', sum);
 
                 for (var j = 0, lenj = data.dataSets[i].length; j < lenj; j++) {
                     if (data.dataSets[i][j] < 1) {
@@ -320,35 +328,40 @@
                 );
             });
 
-            // HACK .ne .se ... harcoded
+            var legendPositionClass = config.options.legend.position;
+
             self.target.find('.content').append(
-                $('<div>').addClass('legends se').append(
-                    legends
-                )
+                $('<div>')
+                    .addClass('legends ' + legendPositionClass)
+                    .append(legends)
             );
         };
 
-        return self.init();
+        self.nativeObject = function() {
+            return self.target;
+        }
+
+        return init();
     };
-
-
 
     $.fn.horbar = function(options) {
 
         var opts = $.extend({}, $.fn.horbar.defaults, options);
+        var chartObjects = [];
 
-        return this.each(function() {
+        this.each(function() {
             var $target = $(this);
 
-            new Chart($target, opts);
+            chartObjects.push(new Chart($target, opts));
         });
+
+        return chartObjects.length === 1 ? chartObjects[0] : chartObjects;
     };
 
     $.fn.horbar.defaults = {
         namespace: 'horbar',
         labels: ["Python", "PHP", "C"],
         data: {
-            'positioning': 'perBar',
             'segments': [{
                     'name': 'Fans',
                     'color': '#FF0000'
@@ -386,10 +399,7 @@
         },
         options: {
             legend: {
-                /*style: {
-
-                },
-                position: "ne"*/
+                position: "se"
             },
             segments: {
                 drawCallBack: function(segment) {
@@ -398,13 +408,15 @@
                 events: {
                     mouseenter: function(segment) {
                         showPopover(segment);
-                        // console.log(segment.data().name + ' -> ' + segment.data().value);
                     },
                     mouseleave: function(segment) {
                         removePopover(segment);
-                        // console.log(segment.data().name + ' -> ' + segment.data().value);
                     },
 
+                },
+                style: {
+                    borderAlpha: 0.9,
+                    backgroundAlpha: 0.6
                 }
             },
             yLabels: {
@@ -421,19 +433,20 @@
             },
             tickLength: 10
         }
-        /*
-          'positioning': 'perSegments',
-          'segments': [],
-          'dataSets': [
-              {'name': "Fans", 'data': [1, 2, 3]},
-              {'name': "Apps", 'data': [5, 20, 1]},
-              //{'name': "Packages", 'data': [11, 0, 2]}
-          ]
-        */
     };
 
     function r() {
         return parseInt(Math.random() * 20);
+    }
+
+    function guid() {
+        function s4() {
+            return Math.floor((1 + Math.random()) * 0x10000)
+                .toString(16)
+                .substring(1);
+        }
+        return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+            s4() + '-' + s4() + s4() + s4();
     }
 
     // Default built-in events and callbacks
@@ -459,9 +472,9 @@
             return;
         }
 
-        // console.log(segment.data());
+        var popoverId = 'horbar-popover';
 
-        var $popover = $('<div>').attr('id', 'horbar-popover').append(
+        var $popover = $('<div>').attr('id', popoverId).append(
             $('<span>').text(segment.data().name),
             $('<span>').text(segment.data().value)
         ).appendTo('body');
@@ -485,7 +498,7 @@
     }
 
     function removePopover(segment) {
-        // TODO: Watch out namespacing, harcoded ".horbar"
+
         segment.data('haspopover', false);
 
         $('#horbar-popover').remove();
