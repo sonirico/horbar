@@ -74,8 +74,36 @@
                 return promise;
             };
 
-            runCallbacks().then(runAdjustments());
+            var animateChart = function () {
+                return new Promise(function (resolve, reject) {
+                    var animationEnabled = config.options.bars.animate;
 
+                    if (animationEnabled) {
+                        var speed = config.options.bars.animationSpeed;
+
+                        self.target.find('.bar').each(function () {
+                            $(this).animate({'width': $(this).data('width') + '%'},
+                              speed
+                            ).promise().done(function () {
+                                resolve();
+                            });
+                        });
+                    } else {
+                        self.target.find('.bar').each(function () {
+                            $(this).css('width', $(this).data('width') + '%');
+                        });
+
+                        resolve();
+                    }
+
+
+                });
+            };
+
+            //runCallbacks()
+            runAdjustments()
+            .then(animateChart)
+            .then(runCallbacks)
         };
 
         self.callBacks = function() {
@@ -294,8 +322,11 @@
                 var $barContainer = $('<div/>').addClass('bar-container');
                 var $bar = $('<div/>')
                   .addClass('bar')
-                  .css('width', width + '%')
-                  .data('value', sum);
+                  .css('width', 0)
+                  .data({
+                    'value': sum,
+                    'width': width
+                  });
 
                 for (var j = 0, lenj = data.dataSets[i].length; j < lenj; j++) {
                     if (data.dataSets[i][j] < 1) {
@@ -398,6 +429,10 @@
             ]
         },
         options: {
+            bars: {
+                animate: true,
+                animationSpeed: 'slow'
+            },
             legend: {
                 position: "se"
             },
