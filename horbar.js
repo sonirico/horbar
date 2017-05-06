@@ -98,7 +98,7 @@
                 var $label = $(this);
 
                 $label.css({
-                    'margin-left': '-' + ($label.width() / 2) + 'px'
+                    'margin-right': '-' + ($label.width() / 2) + 'px'
                 });
             });
         };
@@ -173,11 +173,11 @@
             if (self.threshold < 10) {
                 delta = 1;
             } else {
-                var limitLength = self.threshold.toString().length - 1;
-                var magnitude = Math.pow(10, limitLength);
-                var threshold = Math.ceil(self.threshold / magnitude) * magnitude;
+                var magnitudeLength = self.threshold.toString().length - 1;
+                var magnitude = Math.pow(10, magnitudeLength);
+                var correctedThreshold = Math.ceil(self.threshold / magnitude) * magnitude;
 
-                delta = Math.max(threshold / self.tickLength, self.tickLength);
+                delta = correctedThreshold / self.tickLength;
             }
 
             return delta;
@@ -187,18 +187,21 @@
 
             var res = [];
 
+            console.log(self.threshold);
+
             var delta = self.resolveDelta();
             var nTicks = (self.threshold / delta);
             var widthPerLabel = 100 / nTicks;
             var remainingWidthPercent = 100;
 
-            for (var i = 0; i < (nTicks); i++) {
+            for (var i = 1; i < (nTicks) + 1; i++) {
                 var realWidth = 0;
 
                 if (remainingWidthPercent >= widthPerLabel) {
                     realWidth = widthPerLabel;
                 } else {
                     realWidth = remainingWidthPercent;
+                    break;
                 }
 
                 if (realWidth < 1) {
@@ -219,6 +222,7 @@
                 remainingWidthPercent -= widthPerLabel;
             }
 
+            self.target.find('.x-label-refill').html(0);
             self.target.find('.x-label-container').append(res);
         };
 
@@ -429,7 +433,7 @@
     };
 
     function r() {
-        return parseInt(Math.random() * (Math.random() * 1000));
+        return parseInt(Math.random() * 20);
     }
 
     // Default built-in events and callbacks

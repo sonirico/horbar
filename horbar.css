@@ -23,6 +23,7 @@
     width: 10%;
     height: auto;
     float: left;
+    text-align: right;
 }
 
 .horbar .x-labels .x-label-container {
@@ -35,8 +36,8 @@
 .horbar .x-labels .x-label-container .x-label {
     float: left;
     /*outline: #000000 solid 1px;*/
-    word-break: break-all;
-    text-align: left;
+    /*word-break: break-all;*/
+    text-align: right;
 }
 
 .horbar .content {
