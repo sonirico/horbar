@@ -273,7 +273,7 @@
                 res.push(
                     $('<div>').addClass('y-label').append(
                         $('<span>').addClass('label-text')
-                        .attr('title', label)
+                        .attr('title', stripHTML(label))
                         .html(
                             config.options.yLabels.drawCallBack(label)
                         )
@@ -557,5 +557,8 @@
         } : null;
     }
 
+    function stripHTML (html) {
+        return $('<p>' + html + '</p>').text();
+    }
 
 })(jQuery);
