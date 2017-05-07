@@ -6,7 +6,7 @@
         function init() {
             self.target = target;
             self.segments = config.segments;
-            self.tickLength = config.options.tickLength || 10;
+            self.tickLength = config.tickLength || 10;
             self.threshold = config.threshold || self.getThreshold();
 
 
@@ -66,10 +66,10 @@
 
             var promiseAnimation = function() {
                 return new Promise(function(resolve, reject) {
-                    var animationEnabled = config.options.bars.animate;
+                    var animationEnabled = config.bars.animate;
 
                     if (animationEnabled) {
-                        var speed = config.options.bars.animationSpeed;
+                        var speed = config.bars.animationSpeed;
 
                         self.target.find('.bar').each(function() {
                             $(this).animate({
@@ -97,7 +97,7 @@
 
                     setTimeout(function () {
                         self.target.find('.bar-segment').each(function() {
-                            config.options.segments.drawCallBack($(this))
+                            config.segment.drawCallBack($(this))
                         });
 
                         resolve();
@@ -111,7 +111,7 @@
                     setTimeout(function () {
                         self.target.find('.x-label-content').each(function() {
                             $(this).append(
-                                config.options.xLabels.drawCallBack(
+                                config.xLabels.drawCallBack(
                                     $(this).data().value
                                 )
                             );
@@ -274,7 +274,7 @@
                         $('<span>').addClass('label-text')
                         .attr('title', stripHTML(label))
                         .html(
-                            config.options.yLabels.drawCallBack(label)
+                            config.yLabels.drawCallBack(label)
                         )
                     )
                 );
@@ -285,8 +285,8 @@
 
         self.buildSegment = function(width, hexColor, data) {
             var rgb = hexToRgb(hexColor);
-            var borderAlpha = config.options.segments.style.borderAlpha;
-            var backgroundAlpha = config.options.segments.style.backgroundAlpha;
+            var borderAlpha = config.segmentStyle.borderAlpha;
+            var backgroundAlpha = config.segmentStyle.backgroundAlpha;
 
             var backgroundColor = 'rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', ' + backgroundAlpha + ')';
             var borderColor = 'rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', ' + borderAlpha + ')';
@@ -298,7 +298,7 @@
             }).data(data);
 
             // Bind events to segments
-            var eventsConfig = config.options.segments.events;
+            var eventsConfig = config.segmentEvents;
 
             Object.keys(eventsConfig).forEach(function(eventName) {
                 $segment.bind(eventName, function(e) {
@@ -345,7 +345,9 @@
 
                     var $segment = self.buildSegment(segmentWidth, data.segments[j].color, {
                         'name': data.segments[j].name,
-                        'value': data.dataSets[i][j]
+                        'value': data.dataSets[i][j],
+                        'indexData': i,
+                        'indexSerie': j
                     });
 
                     $bar.append($segment);
@@ -367,7 +369,7 @@
                 );
             });
 
-            var legendPositionClass = config.options.legend.position;
+            var legendPositionClass = config.legend.position;
 
             self.target.find('.content').append(
                 $('<div>')
@@ -425,46 +427,43 @@
                 [r(), r(), r()]
             ]
         },
-        options: {
-            bars: {
-                animate: true,
-                animationSpeed: 'slow'
+        bars: {
+            animate: true,
+            animationSpeed: 'slow'
+        },
+        legend: {
+            position: "se"
+        },
+        segment: {
+            drawCallBack: function(segment) {
+                defaultSegmentCallBack(segment);
+            }
+        },
+        segmentEvents: {
+            mouseenter: function(segment) {
+                showPopover(segment);
             },
-            legend: {
-                position: "se"
+            mouseleave: function(segment) {
+                removePopover(segment);
+            }
+        },
+        segmentStyle: {
+            borderAlpha: 0.9,
+            backgroundAlpha: 0.6
+        },
+        yLabels: {
+            drawCallBack: function(v) {
+                return v;
             },
-            segments: {
-                drawCallBack: function(segment) {
-                    defaultSegmentCallBack(segment);
-                },
-                events: {
-                    mouseenter: function(segment) {
-                        showPopover(segment);
-                    },
-                    mouseleave: function(segment) {
-                        removePopover(segment);
-                    },
-
-                },
-                style: {
-                    borderAlpha: 0.9,
-                    backgroundAlpha: 0.6
-                }
+            events: {}
+        },
+        xLabels: {
+            drawCallBack: function(v) {
+                return v;
             },
-            yLabels: {
-                drawCallBack: function(v) {
-                    return v;
-                },
-                events: {}
-            },
-            xLabels: {
-                drawCallBack: function(v) {
-                    return v;
-                },
-                events: {}
-            },
-            tickLength: 10
-        }
+            events: {}
+        },
+        tickLength: 10
     };
 
     function r() {
