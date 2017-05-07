@@ -176,7 +176,7 @@
   float: left;
   height: 100%;
   border-right: 1px solid grey;
-  margin-right: -1px;
+  box-sizing: border-box;
 }
 
 /* Popover */
