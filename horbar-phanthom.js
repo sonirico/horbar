@@ -28,14 +28,25 @@
 
             self.target.append(
 
-                $('<div>').addClass('y-labels').css(config.yAxis.style),
-                $('<div>').addClass('content').css(config.xAxis.style),
+                $('<div>').addClass('y-labels').css({
+                    'width': config.yAxis.width,
+                    'font-size': config.yAxis.fontSize
+                }),
+                $('<div>').addClass('content').css({
+                    'width': config.xAxis.width
+                }),
                 $('<div>').addClass('x-labels').append(
                     $('<div>').addClass('x-label-refill')
-                    .css(config.yAxis.style)
-                    .html('&nbsp;'),
+                      .css({
+                          'width': config.yAxis.width,
+                          'font-size': config.yAxis.fontSize
+                      })
+                      .html('&nbsp;'),
                     $('<div>').addClass('x-label-container')
-                    .css(config.xAxis.style)
+                      .css({
+                          'width': config.xAxis.width,
+                          'font-size': config.xAxis.fontSize
+                      })
                 )
 
             );
@@ -344,6 +355,9 @@
             self.target.find('.content').append(
                 $('<div>')
                 .addClass('legends ' + legendPositionClass)
+                .css({
+                  'font-size': config.legend.fontSize
+                })
                 .append(legends)
             );
         };
@@ -403,7 +417,8 @@
             height: '50px'
         },
         legend: {
-            position: "se"
+            position: "se",
+            fontSize: '1em'
         },
         segment: {
             drawCallBack: function(segment, config) {
@@ -435,14 +450,10 @@
             events: {}
         },
         xAxis: {
-            style: {
-                width: '80%'
-            }
+            width: '80%'
         },
         yAxis: {
-            style: {
-                width: '20%'
-            }
+            width: '20%'
         },
         tickLength: 10
     };
@@ -481,13 +492,13 @@
         var units = barHeightData.units;
 
         var $span = $('<span/>')
-            .addClass('segment-value')
-            .css({
-                'line-height': (height / 2) + units
-            })
-            .html(
-                $segment.data().value
-            ).appendTo($segment);
+          .addClass('segment-value')
+          .css({
+              'line-height': (height / 2) + units
+          })
+          .html(
+            $segment.data().value
+        ).appendTo($segment);
 
         var segment = $segment[0];
         var offsetWidth = segment.offsetWidth;
@@ -545,7 +556,7 @@
         } : null;
     }
 
-    function stripHTML(html) {
+    function stripHTML (html) {
         return $('<p>' + html + '</p>').text();
     }
 

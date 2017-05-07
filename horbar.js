@@ -388,6 +388,9 @@
             self.target.find('.content').append(
                 $('<div>')
                 .addClass('legends ' + legendPositionClass)
+                .css({
+                  'font-size': config.legend.fontSize
+                })
                 .append(legends)
             );
         };
@@ -447,7 +450,8 @@
             height: '50px'
         },
         legend: {
-            position: "se"
+            position: "se",
+            fontSize: '1em'
         },
         segment: {
             drawCallBack: function(segment, config) {
