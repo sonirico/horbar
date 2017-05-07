@@ -28,11 +28,14 @@
 
             self.target.append(
 
-                $('<div>').addClass('y-labels'),
-                $('<div>').addClass('content'),
+                $('<div>').addClass('y-labels').css(config.yAxis.style),
+                $('<div>').addClass('content').css(config.xAxis.style),
                 $('<div>').addClass('x-labels').append(
-                    $('<div>').addClass('x-label-refill').html('&nbsp;'),
+                    $('<div>').addClass('x-label-refill')
+                      .css(config.yAxis.style)
+                      .html('&nbsp;'),
                     $('<div>').addClass('x-label-container')
+                      .css(config.xAxis.style)
                 )
 
             );
@@ -462,6 +465,16 @@
                 return v;
             },
             events: {}
+        },
+        xAxis: {
+            style: {
+                width: '80%'
+            }
+        },
+        yAxis: {
+            style: {
+                width: '20%'
+            }
         },
         tickLength: 10
     };
