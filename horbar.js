@@ -28,14 +28,22 @@
 
             self.target.append(
 
-                $('<div>').addClass('y-labels').css(config.yAxis.style),
-                $('<div>').addClass('content').css(config.xAxis.style),
+                $('<div>').addClass('y-labels').css({
+                    'width': config.yAxis.width
+                }),
+                $('<div>').addClass('content').css({
+                    'width': config.xAxis.width
+                }),
                 $('<div>').addClass('x-labels').append(
                     $('<div>').addClass('x-label-refill')
-                      .css(config.yAxis.style)
+                      .css({
+                          'width': config.yAxis.width
+                      })
                       .html('&nbsp;'),
                     $('<div>').addClass('x-label-container')
-                      .css(config.xAxis.style)
+                      .css({
+                          'width': config.xAxis.width
+                      })
                 )
 
             );
@@ -468,14 +476,10 @@
             events: {}
         },
         xAxis: {
-            style: {
-                width: '80%'
-            }
+            width: '80%'
         },
         yAxis: {
-            style: {
-                width: '20%'
-            }
+            width: '20%'
         },
         tickLength: 10
     };
