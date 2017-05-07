@@ -1,20 +1,16 @@
 .horbar {
     width: 100%;
     height: auto;
-    /*background-color: lavender;*/
 }
 
 .horbar .y-labels {
     width: 10%;
-    height: 100%;
-    /*background-color: lightblue;*/
     float: left;
 }
 
 .horbar .x-labels {
     width: 100%;
     height: auto;
-    /*background-color: lightblue;*/
     clear: both;
     float: left;
 }
