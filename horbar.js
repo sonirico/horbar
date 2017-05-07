@@ -29,7 +29,8 @@
             self.target.append(
 
                 $('<div>').addClass('y-labels').css({
-                    'width': config.yAxis.width
+                    'width': config.yAxis.width,
+                    'font-size': config.yAxis.fontSize
                 }),
                 $('<div>').addClass('content').css({
                     'width': config.xAxis.width
@@ -37,12 +38,14 @@
                 $('<div>').addClass('x-labels').append(
                     $('<div>').addClass('x-label-refill')
                       .css({
-                          'width': config.yAxis.width
+                          'width': config.yAxis.width,
+                          'font-size': config.yAxis.fontSize
                       })
                       .html('&nbsp;'),
                     $('<div>').addClass('x-label-container')
                       .css({
-                          'width': config.xAxis.width
+                          'width': config.xAxis.width,
+                          'font-size': config.xAxis.fontSize
                       })
                 )
 
