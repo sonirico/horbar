@@ -100,7 +100,7 @@
 
                     setTimeout(function () {
                         self.target.find('.bar-segment').each(function() {
-                            config.segment.drawCallBack($(this))
+                            config.segment.drawCallBack($(this), config)
                         });
 
                         resolve();
@@ -133,20 +133,18 @@
         };
 
         function adjustLabels() {
+            var barHeightData = barHeight(config.bars.height);
+
+            var height = barHeightData.value;
+            var units = barHeightData.units;
 
             // Y labels
-            var $sampleBar = self.target.find('.bar-row').first();
-            if ($sampleBar.length > 0) {
-                var height = $sampleBar.height();
-
-                self.target.find('.y-label').css({
-                    'height': height + 'px',
-                    'line-height': height + 'px'
-                });
-            }
+            self.target.find('.y-label').css({
+                'height': height + units,
+                'line-height': height + units
+            });
 
             // X labels
-
             self.target.find('.x-label-content').each(function() {
                 var $label = $(this);
 
@@ -322,7 +320,9 @@
 
             for (var i = 0, leni = data.dataSets.length; i < leni; i++) {
 
-                var $row = $('<div/>').addClass('bar-row');
+                var $row = $('<div/>').addClass('bar-row').css({
+                    'height': config.bars.height
+                });
 
                 var sum = data.dataSets[i].reduce(function(a, b) {
                     return a + b;
@@ -432,14 +432,15 @@
         },
         bars: {
             animate: true,
-            animationSpeed: 'slow'
+            animationSpeed: 'slow',
+            height: '50px'
         },
         legend: {
             position: "se"
         },
         segment: {
-            drawCallBack: function(segment) {
-                defaultSegmentCallBack(segment);
+            drawCallBack: function(segment, config) {
+                defaultSegmentCallBack(segment, config);
             }
         },
         segmentEvents: {
@@ -483,6 +484,18 @@
         return parseInt(Math.random() * 20);
     }
 
+    function barHeight(value) {
+        if (undefined === value) return {};
+
+        var height = parseInt(value);
+        var units = value.match(/[^\d]+$/)[0];
+
+        return {
+            value: height,
+            units: units
+        }
+    }
+
     function guid() {
         function s4() {
             return Math.floor((1 + Math.random()) * 0x10000)
@@ -494,9 +507,18 @@
     }
 
     // Default built-in events and callbacks
-    function defaultSegmentCallBack($segment) {
+    function defaultSegmentCallBack($segment, config) {
+        var barHeightData = barHeight(config.bars.height);
 
-        var $span = $('<span/>').addClass('segment-value').html(
+        var height = barHeightData.value;
+        var units = barHeightData.units;
+
+        var $span = $('<span/>')
+          .addClass('segment-value')
+          .css({
+              'line-height': (height / 2) + units
+          })
+          .html(
             $segment.data().value
         ).appendTo($segment);
 

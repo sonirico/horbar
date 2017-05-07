@@ -56,13 +56,12 @@
     width: 100%;
     clear: both;
     height: 2em;
-    /*background-color: pink;*/
     border-bottom: 1px solid #888;
+    box-sizing: border-box;
 }
 
 .horbar .y-labels .y-label {
     height: auto;
-    /*background-color: orange;*/
     text-align: right;
     padding-right: 1em;
     clear: both;
@@ -75,19 +74,9 @@
     overflow: hidden;
     white-space: nowrap;
     height: auto;
-    /*background-color: pink;*/
     text-align: right;
     margin-right: 1em;
 }
-
-
-/*
-.horbar .content {
-    border-left: 2px solid black;
-    border-bottom: 2px solid black;
-    margin-left: -2px;
-    margin-bototm: -2px;
-}*/
 
 .horbar .content .bar-row .bar-container {
     position: relative;
