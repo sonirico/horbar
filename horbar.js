@@ -5,7 +5,6 @@
 
         function init() {
             self.target = target;
-            self.dataSets = config.dataSets;
             self.segments = config.segments;
             self.tickLength = config.options.tickLength || 10;
             self.threshold = config.threshold || self.getThreshold();
@@ -218,7 +217,7 @@
                     Math, config.data.dataSets.map(function(b) {
                         return b.reduce(function(x, y) {
                             return x + y;
-                        })
+                        }, 0)
                     })
                 );
 
@@ -324,7 +323,7 @@
 
                 var sum = data.dataSets[i].reduce(function(a, b) {
                     return a + b;
-                });
+                }, 0);
 
                 var width = ((sum / self.threshold) * 100);
 
@@ -402,29 +401,21 @@
         namespace: 'horbar',
         labels: ["Python", "PHP", "C"],
         data: {
-            'segments': [{
-                    'name': 'Fans',
+            segments: [{
+                    'name': '#Fans',
                     'color': '#FF0000'
                 },
                 {
-                    'name': 'Apps',
+                    'name': '#Apps',
                     'color': '#00FF00'
                 },
                 {
-                    'name': 'Packages',
+                    'name': '#Packages',
                     'color': '#0000FF'
                 }
             ],
-            'dataSets': [
-                // [1, 5, 11],
-                // [2, 2, 0],
-                // [3, 1, 2],
-                [r(), r(), r()],
-                [r(), r(), r()],
-                [r(), r(), r()],
-                [r(), r(), r()],
-                [r(), r(), r()],
-                [r(), r(), r()],
+            dataSets: [
+                // Some random sample data
                 [r(), r(), r()],
                 [r(), r(), r()],
                 [r(), r(), r()],
@@ -432,9 +423,6 @@
                 [r(), r(), r()],
                 [r(), r(), r()],
                 [r(), r(), r()]
-                // [2],
-                // [5],
-                // [10]
             ]
         },
         options: {
@@ -496,7 +484,6 @@
     // Default built-in events and callbacks
     function defaultSegmentCallBack($segment) {
 
-        // console.log($segment.width());
         var $span = $('<span/>').addClass('segment-value').html(
             $segment.data().value
         ).appendTo($segment);
