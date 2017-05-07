@@ -55,7 +55,7 @@
     position: relative;
     width: 100%;
     clear: both;
-    height: 2em;
+    height: 50px;
     border-bottom: 1px solid #888;
     box-sizing: border-box;
 }
@@ -192,5 +192,5 @@
     text-align: center;
     color: black;
     font-weight: bold;
-    line-height: 16px; /* Half the value of bar-row height property */
+    line-height: 25px; /* Half the value of bar-row height property */
 }
